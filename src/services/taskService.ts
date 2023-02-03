@@ -24,8 +24,10 @@ export function modifyTask(index: number, name: string, description: string, scr
 		tasks[index].name = name;
 		tasks[index].description = description;
 		tasks[index].script = script;
+		tasks[index].parseScript();
 		return tasks;
 	});
+
 	saveTasks();
 }
 

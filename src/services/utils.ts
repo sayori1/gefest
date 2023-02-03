@@ -8,8 +8,8 @@ export async function onInit() {
 }
 
 export function evalInContext(js: string, context: any) {
-	return function () {
-		return eval(js);
+	return async function () {
+		return eval('(async () => {' + js + '})()');
 	}.call(context);
 }
 

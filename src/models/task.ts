@@ -6,26 +6,38 @@ export class Task {
 	description: string;
 	creationDate: Date;
 	script: string;
-
 	functions: { [key: string]: Function } = {};
-
 	progressBar: ProgressBar = new ProgressBar();
+
+	onRefresh: Function = new Function();
 
 	constructor(name: string, description: string, script: string) {
 		this.name = name;
 		this.description = description;
 		this.creationDate = new Date();
-		this.script = script || 'function onCreate(){\nthis.startCompleting(30);\n}';
+		this.script = script || 'function onStart(){await this.wait(30)}';
+		this.parseScript();
 	}
 
-	startCompleting(time: number) {}
+	async wait(duration: number) {
+		let alpha = 0;
+		let t = setInterval(() => {
+			alpha += 1;
+			this.progressBar.occupancy = alpha / duration;
+			this.onRefresh();
+			if (alpha >= duration) clearInterval(t);
+		}, 1000);
+		return new Promise((resolve) => setTimeout(resolve, duration * 1000));
+	}
 
 	parseScript() {
 		let regExp = /function\s*(\w*)\s*\(([^)]*)\)\s*\{([\s\S]*?)\}/g;
 		let match: string[];
 		while ((match = regExp.exec(this.script)!) !== null) {
-			this.functions[match[1]] = () => evalInContext(match[3], this);
-			evalInContext(match[3], this);
+			let currentMatch = match;
+			this.functions[currentMatch[1]] = async () => {
+				evalInContext(currentMatch[3], this);
+			};
 		}
 	}
 }

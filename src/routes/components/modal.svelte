@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
-	import ModalStore from '../services/modalService';
+	import ModalStore from '../../services/modalService';
 	let isOpen = false;
 
 	onMount(() => {
