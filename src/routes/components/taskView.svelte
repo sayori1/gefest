@@ -24,7 +24,7 @@
 	<div class="task-actions">
 		<span class="task-action" on:click={() => dispatch('edit')}>&#x270E;</span>
 		<span class="task-action" on:click={() => dispatch('delete')}>&#x2718;</span>
-		<span class="task-action" on:click={() => task.functions.onStart()}>&#9658;</span>
+		<span class="task-action" on:click={() => console.log()}>&#9658;</span>
 	</div>
 </div>
 

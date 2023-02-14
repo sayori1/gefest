@@ -6,36 +6,44 @@
 	import ModalStore from '../../services/modalService';
 	import ProgressBarView from './progressBarView.svelte';
 	import TaskView from './taskView.svelte';
+	import Tags from './tags.svelte';
 
-	function OnAddTaskButtonDown() {
+	let currentTask: Task = new Task('', '', '', []);
+	let currentId: number;
+	let mode: 'Creating' | 'Editing';
+
+	const handleAddTask = () => {
 		mode = 'Creating';
-		currentTask = new Task('', '', '');
+		currentTask = new Task('', '', '', []);
 		ModalStore.open();
-	}
+	};
 
-	function OnDeleteTaskButtonDown(index: number) {
+	const handleDeleteTask = (index: number) => {
 		deleteTask(index);
-	}
+	};
 
-	function OnEditTaskButtonDown(index: number) {
+	const handleEditTask = (index: number) => {
 		mode = 'Editing';
 		currentId = index;
 		currentTask = $tasks[index];
 		ModalStore.open();
-	}
+	};
 
-	function OnOkButtonDown() {
-		if (mode == 'Creating') addTask(currentTask.name, currentTask.description, currentTask.script);
-		if (mode == 'Editing')
-			modifyTask(currentId, currentTask.name, currentTask.description, currentTask.script);
-	}
+	const handleOkButton = () => {
+		if (mode == 'Creating') addTask(currentTask);
+		if (mode == 'Editing') modifyTask(currentId, currentTask);
+	};
 
-	let currentTask: Task;
-	let currentId: number;
-	let mode: 'Creating' | 'Editing';
+	onMount(() => {
+		loadTasks();
+	});
+
+	const loadTasks = () => {
+		tasks.set(JSON.parse(localStorage.getItem('tasks') || '[]'));
+	};
 </script>
 
-<Modal on:close={OnOkButtonDown}>
+<Modal on:close={handleOkButton}>
 	{#if currentTask}
 		<input style="width: 98%" placeholder="Name" bind:value={currentTask.name} />
 		<div style="height: 10px" />
@@ -51,17 +59,19 @@
 			bind:value={currentTask.script}
 		/>
 		<div style="height: 10px" />
+		<Tags bind:selectedTags={currentTask.tags} />
+		<div style="height: 10px" />
 	{/if}
 </Modal>
 
 <div>
 	<div style="display:flex; flex-direction: row">
-		<h1>Today</h1>
+		<h1>Tasks</h1>
 		<div style="width: 10px" />
 		<div style="display:flex; justify-content: center; align-items: center; cursor: pointer">
 			<div
-				on:click={() => OnAddTaskButtonDown()}
-				style=" background-color: #ececec; display:flex; justify-content: center; align-items: center; width: 20px; height:20px"
+				on:click={handleAddTask}
+				style="background-color: #ececec; display:flex; justify-content: center; align-items: center; width: 20px; height:20px"
 			>
 				<b>&#x2b;</b>
 			</div>
@@ -69,10 +79,6 @@
 	</div>
 
 	{#each $tasks as task, i}
-		<TaskView
-			bind:task
-			on:delete={() => OnDeleteTaskButtonDown(i)}
-			on:edit={() => OnEditTaskButtonDown(i)}
-		/>
+		<TaskView bind:task on:delete={() => handleDeleteTask(i)} on:edit={() => handleEditTask(i)} />
 	{/each}
 </div>

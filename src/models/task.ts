@@ -6,15 +6,17 @@ export class Task {
 	description: string;
 	creationDate: Date;
 	script: string;
+	tags: string[] = [];
 	functions: { [key: string]: Function } = {};
 	progressBar: ProgressBar = new ProgressBar();
 
 	onRefresh: Function = new Function();
 
-	constructor(name: string, description: string, script: string) {
+	constructor(name: string, description: string, script: string, tags: string[]) {
 		this.name = name;
 		this.description = description;
 		this.creationDate = new Date();
+		this.tags = tags;
 		this.script = script || 'function onStart(){await this.wait(30)}';
 		this.parseScript();
 	}

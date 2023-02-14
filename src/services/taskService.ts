@@ -1,33 +1,27 @@
-import { Task } from '../models/task';
+import type { Task } from '../models/task';
 import { writable } from 'svelte/store';
 
-export let tasks = writable<Task[]>([]);
+export const tasks = writable<Task[]>([]);
 
-export function addTask(name: string, description: string, script: string): void {
+export function addTask(task: Task): void {
 	tasks.update((tasks) => {
-		tasks.push(new Task(name, description, script));
-		return tasks;
+		return [...tasks, task];
 	});
 	saveTasks();
 }
 
 export function deleteTask(index: number): void {
 	tasks.update((tasks) => {
-		tasks.splice(index, 1);
-		return tasks;
+		return tasks.filter((_, i) => i !== index);
 	});
 	saveTasks();
 }
 
-export function modifyTask(index: number, name: string, description: string, script: string): void {
+export function modifyTask(index: number, task: Task): void {
 	tasks.update((tasks) => {
-		tasks[index].name = name;
-		tasks[index].description = description;
-		tasks[index].script = script;
-		tasks[index].parseScript();
+		tasks[index] = task;
 		return tasks;
 	});
-
 	saveTasks();
 }
 
@@ -38,8 +32,14 @@ export function saveTasks(): void {
 }
 
 export function loadTasks(): void {
-	const tasks = JSON.parse(localStorage.getItem('tasks')!);
-	if (tasks) {
-		tasks.set(tasks);
+	const savedTasks = localStorage.getItem('tasks');
+	if (savedTasks) {
+		tasks.set(JSON.parse(savedTasks));
+		tasks.update((tasks)=>tasks.map((task)=>
+		{
+			task.parseScript();
+			return task;
+		}
+		));
 	}
 }
